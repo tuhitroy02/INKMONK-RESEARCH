@@ -1,0 +1,222 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: "Comic Sans MS", "Comic Sans", "Comic Neue", cursive, sans-serif;
+  --font-serif: "Comic Sans MS", "Comic Sans", "Comic Neue", cursive, sans-serif;
+}
+
+*, *::before, *::after, html, body, p, span, div, a, button, input, select, textarea, li, h1, h2, h3, h4, h5, h6, label {
+  font-family: "Comic Sans MS", "Comic Sans", "Comic Neue", cursive, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 900 !important;
+}
+
+body {
+  font-family: "Comic Sans MS", "Comic Sans", "Comic Neue", cursive, sans-serif !important;
+  font-weight: 700 !important;
+  background-color: #F9F7F4;
+  color: #0F172A;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Typography Utility Classes ─────────────────────────────────────────── */
+.font-serif, .font-sans {
+  font-family: "Comic Sans MS", "Comic Sans", "Comic Neue", cursive, sans-serif !important;
+  font-weight: 700 !important;
+}
+
+/* ─── Prestige Color Gradients & Surfaces ────────────────────────────────── */
+.bg-midnight {
+  background: radial-gradient(circle at 80% 20%, #152758 0%, #0A1128 50%, #060B1A 100%);
+}
+
+.bg-midnight-card {
+  background: rgba(16, 26, 56, 0.75);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.bg-glass-white {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+}
+
+.gradient-saffron {
+  background: linear-gradient(135deg, #E8671A 0%, #F59E0B 100%);
+}
+
+.gradient-gold-text {
+  background: linear-gradient(135deg, #F5A623 0%, #FBBF24 50%, #F59E0B 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.gradient-saffron-text {
+  background: linear-gradient(135deg, #E8671A 0%, #F97316 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ─── Interactive Buttons ────────────────────────────────────────────────── */
+.btn-primary-glow {
+  background: linear-gradient(135deg, #E8671A 0%, #F59E0B 100%);
+  color: #FFFFFF;
+  font-weight: 800 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 2rem;
+  border-radius: 9999px;
+  box-shadow: 0 10px 25px -5px rgba(232, 103, 26, 0.4), 0 8px 10px -6px rgba(232, 103, 26, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif !important;
+}
+
+.btn-primary-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 30px -5px rgba(232, 103, 26, 0.55), 0 10px 15px -5px rgba(232, 103, 26, 0.3);
+  filter: brightness(1.05);
+}
+
+.btn-secondary-dark {
+  background: rgba(255, 255, 255, 0.08);
+  color: #FFFFFF;
+  font-weight: 800 !important;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.875rem 1.875rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(12px);
+  transition: all 0.25s ease;
+  text-decoration: none;
+  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif !important;
+}
+
+.btn-secondary-dark:hover {
+  background: rgba(255, 255, 255, 0.16);
+  border-color: rgba(255, 255, 255, 0.4);
+  transform: translateY(-2px);
+}
+
+.btn-whatsapp-pill {
+  background: #25D366;
+  color: #FFFFFF;
+  font-weight: 800 !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.75rem;
+  border-radius: 9999px;
+  box-shadow: 0 10px 20px -5px rgba(37, 211, 102, 0.4);
+  transition: all 0.25s ease;
+  text-decoration: none;
+  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif !important;
+}
+
+.btn-whatsapp-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 25px -5px rgba(37, 211, 102, 0.5);
+  filter: brightness(1.05);
+}
+
+/* ─── Luxury Badge ───────────────────────────────────────────────────────── */
+.badge-pill-gold {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(245, 166, 35, 0.12);
+  border: 1px solid rgba(245, 166, 35, 0.35);
+  color: #F5A623;
+  font-weight: 800 !important;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 1rem;
+  border-radius: 9999px;
+  font-family: "Comic Sans MS", "Comic Sans", cursive, sans-serif !important;
+}
+
+/* ─── Cards & Surfaces ───────────────────────────────────────────────────── */
+.card-premium {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1.5rem;
+  padding: 2rem;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 20px -2px rgba(10, 17, 40, 0.05);
+}
+
+.card-premium:hover {
+  transform: translateY(-6px);
+  border-color: rgba(232, 103, 26, 0.35);
+  box-shadow: 0 20px 35px -10px rgba(10, 17, 40, 0.12);
+}
+
+/* ─── Chat Bubbles ───────────────────────────────────────────────────────── */
+.chat-bubble-bot {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 1.25rem 1.25rem 1.25rem 0.25rem;
+  padding: 1rem 1.25rem;
+  color: #0F172A;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
+  font-weight: 700 !important;
+}
+
+.chat-bubble-user {
+  background: linear-gradient(135deg, #1A2B6D, #2B45A2);
+  border-radius: 1.25rem 1.25rem 0.25rem 1.25rem;
+  padding: 1rem 1.25rem;
+  color: #FFFFFF;
+  box-shadow: 0 4px 15px rgba(26, 43, 109, 0.25);
+  font-weight: 700 !important;
+}
+
+/* ─── Animations ─────────────────────────────────────────────────────────── */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.05); }
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 4s ease-in-out infinite;
+}
+
+.typing-dot {
+  width: 7px;
+  height: 7px;
+  background: #E8671A;
+  border-radius: 50%;
+  animation: typing 1.2s infinite ease-in-out;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typing {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; }
+  40% { transform: scale(1); opacity: 1; }
+}

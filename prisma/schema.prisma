@@ -1,0 +1,242 @@
+// InkMonk Research — Prisma Schema
+// Database: SQLite (file-based, zero-config)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── User / Auth ────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  hashedPassword String?
+  provider      String    @default("credentials") // credentials | google
+  role          String    @default("CLIENT")      // CLIENT | STAFF | ADMIN
+  status        String    @default("ACTIVE")      // ACTIVE | SUSPENDED
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  projects      Project[]
+  messages      Message[]
+  projectFiles  ProjectFile[]
+  auditLogs     AuditLog[]
+
+  @@index([email])
+}
+
+// ─── Service Catalogue ───────────────────────────────────────────────────────
+
+model ServiceRule {
+  id          String   @id @default(cuid())
+  language    String   // EN | HI | TURNITIN
+  workType    String   // TECH | NON_TECH | NA
+  service     String   // RESEARCH_PAPER | REVIEW_PAPER | SYNOPSIS | THESIS | BOOK | ARTICLE | PPT | MODEL | OTHERS | ASSIGNMENTS | TURNITIN_REPORT | AI_REMOVAL | PLAGIARISM_REMOVAL
+  package     String?  // BOOK_100 | BOOK_200 | BOOK_300 | MODEL_SMALL | MODEL_BIG | MODEL_HUGE
+  priceType   String   // FIXED | PER_WORD | PER_SLIDE | PER_FILE | BUNDLED
+  amountPaise Int      // Amount in paise (integer arithmetic)
+  modelPaise  Int?     // For BUNDLED: model component in paise
+  unit        String?  // word | slide | file | page
+  isActive    Boolean  @default(true)
+  isPending   Boolean  @default(false)  // awaiting confirmation before auto-quoting
+  notes       String?
+  updatedBy   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  auditLogs   AuditLog[]
+
+  @@index([language, workType, service])
+}
+
+// ─── Lead & Quote ────────────────────────────────────────────────────────────
+
+model Lead {
+  id            String    @id @default(cuid())
+  channel       String    // MANUAL | CHAT
+  language      String?   // EN | HI | TURNITIN
+  domain        String?
+  workType      String?   // TECH | NON_TECH
+  service       String?
+  package       String?
+  requirements  String?
+  deadline      String?
+  quantity      Int?      // word count / slide count / file count
+  totalPaise    Int?      // Calculated total in paise
+  breakdown     String?   // JSON string of price breakdown
+  
+  // Contact
+  name          String?
+  email         String?
+  phone         String?
+  
+  // Status
+  status        String    @default("NEW") // NEW | CONTACTED | QUOTED | CONVERTED | CLOSED
+  notes         String?
+  followUpAt    DateTime?
+  whatsAppClickedAt DateTime?
+  
+  // Links
+  projectId     String?
+  project       Project?  @relation(fields: [projectId], references: [id])
+  
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([status])
+  @@index([email])
+}
+
+// ─── Project ─────────────────────────────────────────────────────────────────
+
+model Project {
+  id          String    @id @default(cuid())
+  title       String
+  scope       String?   // Agreed scope description
+  deadline    DateTime?
+  status      String    @default("ENQUIRY") // ENQUIRY | IN_PROGRESS | REVIEW | DELIVERED | CLOSED
+  totalPaise  Int?
+  
+  clientId    String
+  client      User      @relation(fields: [clientId], references: [id])
+  staffOwner  String?
+  
+  milestones  Milestone[]
+  files       ProjectFile[]
+  messages    Message[]
+  leads       Lead[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([clientId])
+  @@index([status])
+}
+
+model Milestone {
+  id          String    @id @default(cuid())
+  projectId   String
+  project     Project   @relation(fields: [projectId], references: [id])
+  title       String
+  description String?
+  status      String    @default("PENDING") // PENDING | IN_PROGRESS | DONE
+  dueAt       DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+// ─── Files ───────────────────────────────────────────────────────────────────
+
+model ProjectFile {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  filename    String
+  storagePath String
+  fileType    String   // SUBMISSION | DELIVERY | REFERENCE
+  sizeBytes   Int?
+  mimeType    String?
+  uploadedBy  String
+  uploader    User     @relation(fields: [uploadedBy], references: [id])
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+}
+
+// ─── Messages ────────────────────────────────────────────────────────────────
+
+model Message {
+  id          String   @id @default(cuid())
+  projectId   String
+  project     Project  @relation(fields: [projectId], references: [id])
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  content     String
+  isHandoff   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  @@index([projectId])
+}
+
+// ─── Samples / Gallery ───────────────────────────────────────────────────────
+
+model Sample {
+  id           String   @id @default(cuid())
+  title        String
+  description  String?
+  deliverableType String  // research_paper | review | synopsis | thesis | book | article | ppt | other
+  language     String?  // EN | HI
+  fileRef      String?  // path to public file
+  previewText  String?  // Short excerpt
+  isPublished  Boolean  @default(false)
+  isRedacted   Boolean  @default(false)
+  sortOrder    Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+// ─── Chat Sessions ────────────────────────────────────────────────────────────
+
+model ChatSession {
+  id             String   @id @default(cuid())
+  sessionToken   String   @unique
+  conversationLog String   // JSON array of messages
+  state          String   @default("INIT") // current FSM state
+  context        String   @default("{}") // JSON context object
+  leadId         String?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([sessionToken])
+}
+
+// ─── Analytics (NO PII) ───────────────────────────────────────────────────────
+
+model AnalyticsEvent {
+  id        String   @id @default(cuid())
+  event     String   // QUOTE_START | QUOTE_COMPLETE | CHAT_START | CHAT_COMPLETE | WHATSAPP_CLICK | DIRECT_CHAT_CLICK | PAGE_VIEW
+  channel   String?  // MANUAL | CHAT
+  page      String?
+  timestamp DateTime @default(now())
+  // NO name, email, phone stored here
+
+  @@index([event])
+  @@index([timestamp])
+}
+
+// ─── Audit Log ───────────────────────────────────────────────────────────────
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  entity      String   // ServiceRule | Lead | User | Sample
+  entityId    String
+  field       String
+  oldValue    String?
+  newValue    String?
+  changedBy   String?
+  user        User?    @relation(fields: [changedBy], references: [id])
+  serviceRule ServiceRule? @relation(fields: [entityId], references: [id])
+  changedAt   DateTime @default(now())
+
+  @@index([entity, entityId])
+  @@index([changedAt])
+}
+
+// ─── FAQ ─────────────────────────────────────────────────────────────────────
+
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String
+  category  String   @default("general")
+  sortOrder Int      @default(0)
+  isPublished Boolean @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
