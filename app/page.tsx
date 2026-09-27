@@ -93,7 +93,7 @@ export default function HomePage() {
 
       {/* ─── Hero Section ─────────────────────────────────────────────────── */}
       <section
-        className="relative overflow-hidden pt-28 pb-20 md:pt-36 md:pb-28 text-white text-center"
+        className="relative overflow-hidden pt-12 pb-20 md:pt-20 md:pb-28 text-white text-center"
         style={{
           background: 'radial-gradient(circle at 50% 20%, #172A66 0%, #0A1128 60%, #050814 100%)',
         }}
@@ -184,23 +184,23 @@ export default function HomePage() {
                 <div className="absolute -inset-4 rounded-full bg-gradient-to-r from-orange-500/25 to-amber-500/25 blur-2xl animate-pulse-glow" />
 
                 {/* Circular Logo Container */}
-                <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full bg-white border-4 border-amber-400 shadow-2xl overflow-hidden flex items-center justify-center p-6">
+                <div className="relative w-72 h-72 sm:w-80 sm:h-80 lg:w-96 lg:h-96 rounded-full bg-white border-4 border-amber-400 shadow-2xl overflow-hidden flex items-center justify-center">
                   <Image
                     src="/logo.png"
                     alt="InkMonk Research Official Circular Logo"
                     fill
                     sizes="(max-width: 768px) 288px, 384px"
-                    className="object-contain p-4 rounded-full"
+                    className="object-contain !p-10 sm:!p-12 lg:!p-14"
                     priority
                   />
                 </div>
 
                 {/* Floating Badges */}
-                <div className="absolute top-2 -left-2 bg-[#0A1128] text-white border border-white/20 text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-xl flex items-center gap-1.5">
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#0A1128] text-white border border-white/20 text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-xl flex items-center gap-1.5">
                   <span>✍️</span>
                   <span>Pure Scholarship</span>
                 </div>
-                <div className="absolute bottom-2 -right-2 bg-emerald-600 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-xl flex items-center gap-1.5">
+                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-emerald-600 text-white text-xs font-bold px-3.5 py-1.5 rounded-xl shadow-xl flex items-center gap-1.5">
                   <span>🛡️</span>
                   <span>0% AI • Plag &lt; 10%</span>
                 </div>

@@ -16,6 +16,7 @@ model User {
   id            String    @id @default(cuid())
   name          String
   email         String    @unique
+  phone         String?   @unique
   hashedPassword String?
   provider      String    @default("credentials") // credentials | google
   role          String    @default("CLIENT")      // CLIENT | STAFF | ADMIN
@@ -29,6 +30,21 @@ model User {
   auditLogs     AuditLog[]
 
   @@index([email])
+}
+
+model EmailLoginCode {
+  email       String   @id
+  codeHash    String
+  expiresAt   DateTime
+  lastSentAt  DateTime
+  sends       Int      @default(1)
+  attempts    Int      @default(0)
+}
+
+model AuthRateLimit {
+  key       String   @id
+  count     Int
+  resetAt   DateTime
 }
 
 // ─── Service Catalogue ───────────────────────────────────────────────────────

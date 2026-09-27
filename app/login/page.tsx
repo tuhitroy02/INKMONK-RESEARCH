@@ -1,122 +1,109 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { Suspense, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
+  return <Suspense fallback={<div className="min-h-screen" />}><LoginContent /></Suspense>;
+}
+
+function LoginContent() {
   const router = useRouter();
+  const params = useSearchParams();
+  const [identifier, setIdentifier] = useState('');
+  const [code, setCode] = useState('');
+  const [sent, setSent] = useState(false);
+  const [staff, setStaff] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(params.has('error') ? 'Google sign-in could not be completed. Please try again.' : null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  async function post(url: string, body: object) {
     setLoading(true);
     setError(null);
-
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || 'Login failed');
-      }
-
-      if (data.user.role === 'ADMIN' || data.user.role === 'STAFF') {
-        router.push('/admin');
-      } else {
-        router.push('/client');
-      }
-    } catch (err: any) {
-      setError(err.message || 'Invalid credentials');
+      const response = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error || 'Please try again.');
+      return data;
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Please try again.');
+      return null;
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  async function sendCode(event: React.FormEvent) {
+    event.preventDefault();
+    const result = await post('/api/auth/otp/send', { identifier });
+    if (result) setSent(true);
+  }
+
+  async function verifyCode(event: React.FormEvent) {
+    event.preventDefault();
+    const result = await post('/api/auth/otp/verify', { identifier, code });
+    if (result) router.replace('/client');
+  }
+
+  async function staffLogin(event: React.FormEvent) {
+    event.preventDefault();
+    const result = await post('/api/auth/login', { email, password });
+    if (result) router.replace(result.user.role === 'CLIENT' ? '/client' : '/admin');
+  }
 
   return (
-    <div className="min-h-screen bg-ink-50 py-16 px-4 flex items-center justify-center">
+    <div className="min-h-[calc(100vh-5rem)] bg-[#F9F7F4] px-4 py-10 sm:py-16 flex items-center justify-center">
       <div className="max-w-md w-full">
-
-        <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl gradient-orange text-white font-serif font-bold text-2xl flex items-center justify-center mx-auto mb-4 shadow-md">
-            IM
-          </div>
-          <h1 className="font-serif text-3xl font-bold text-navy-800 mb-2">Portal Access</h1>
-          <p className="text-ink-600 text-sm">
-            Sign in to your client dashboard or administrative management console.
-          </p>
+        <div className="text-center mb-7">
+          <h1 className="font-serif text-3xl font-bold text-[#0A1128] mb-2">CLIENT LOGIN</h1>
+          <p className="text-slate-600 text-sm">Access your InkMonk Research dashboard.</p>
         </div>
-
-        <div className="bg-white rounded-3xl p-8 border border-ink-100 shadow-card">
-          <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-xs font-semibold text-ink-700 mb-1">Email Address</label>
-              <input
-                type="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@inkmonkresearch.com"
-                className="input-field text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-ink-700 mb-1">Password</label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="input-field text-sm"
-              />
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-50 text-red-700 text-xs rounded-xl border border-red-200">
-                {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-primary w-full justify-center text-sm py-3"
-            >
-              {loading ? 'Authenticating...' : 'Sign In →'}
-            </button>
-          </form>
-
-          {/* Quick Demo Credentials */}
-          <div className="mt-8 pt-6 border-t border-ink-100">
-            <div className="text-xs font-bold text-navy-800 uppercase tracking-wider mb-2">
-              Default Demonstration Credentials:
-            </div>
-            <div className="space-y-2 text-xs text-ink-600 bg-ink-50 p-3 rounded-xl border border-ink-100">
+        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg">
+          {!staff ? <>
+            <a href="/api/auth/google" className="w-full min-h-12 flex items-center justify-center gap-3 rounded-xl border border-slate-300 text-[#0A1128] hover:bg-slate-50 text-sm font-bold">
+              <span aria-hidden="true" className="text-xl font-bold text-blue-600">G</span> Continue with Google
+            </a>
+            <div className="flex items-center gap-3 my-6 text-xs text-slate-500"><span className="h-px bg-slate-200 flex-1" />OR USE A ONE-TIME CODE<span className="h-px bg-slate-200 flex-1" /></div>
+            <form onSubmit={sent ? verifyCode : sendCode} className="space-y-4">
               <div>
-                <strong>Admin Portal:</strong> <span className="font-mono text-navy-800">admin@inkmonk.com</span> / <span className="font-mono text-navy-800">admin123</span>
+                <label htmlFor="identifier" className="block text-sm text-[#0A1128] mb-2">Email or phone number</label>
+                <input id="identifier" autoComplete="username" required value={identifier}
+                  onChange={(event) => { setIdentifier(event.target.value); setSent(false); setCode(''); }}
+                  placeholder="name@example.com or +91 9876543210"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-[#0A1128] bg-white" />
               </div>
-              <div>
-                <strong>Client Portal:</strong> <span className="font-mono text-navy-800">client@inkmonk.com</span> / <span className="font-mono text-navy-800">client123</span>
-              </div>
-            </div>
-          </div>
+              {sent && <div>
+                <label htmlFor="code" className="block text-sm text-[#0A1128] mb-2">Code sent to {identifier}</label>
+                <input id="code" inputMode="numeric" autoComplete="one-time-code" required value={code}
+                  onChange={(event) => setCode(event.target.value)} maxLength={8} placeholder="Enter your code"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-[#0A1128] bg-white" />
+              </div>}
+              {error && <p role="alert" className="text-sm text-red-700 bg-red-50 rounded-xl p-3">{error}</p>}
+              <button type="submit" disabled={loading} className="btn-primary-glow w-full text-sm disabled:opacity-60">
+                {loading ? 'Please wait…' : sent ? 'Verify and sign in' : 'Send me a code'}
+              </button>
+              {sent && <button type="button" disabled={loading} onClick={() => { setSent(false); setCode(''); }} className="block mx-auto text-sm text-orange-700 underline">Request another code</button>}
+            </form>
+            <p className="mt-5 text-xs text-slate-500">Indian 10-digit numbers use +91. Other numbers need a country code.</p>
+          </> : <form onSubmit={staffLogin} className="space-y-4">
+            <h2 className="text-xl font-bold text-[#0A1128]">Staff and admin sign-in</h2>
+            <label className="block text-sm text-[#0A1128]">Email
+              <input type="email" autoComplete="username" required value={email} onChange={(event) => setEmail(event.target.value)} className="block mt-2 w-full rounded-xl border border-slate-300 px-4 py-3" />
+            </label>
+            <label className="block text-sm text-[#0A1128]">Password
+              <input type="password" autoComplete="current-password" required value={password} onChange={(event) => setPassword(event.target.value)} className="block mt-2 w-full rounded-xl border border-slate-300 px-4 py-3" />
+            </label>
+            {error && <p role="alert" className="text-sm text-red-700 bg-red-50 rounded-xl p-3">{error}</p>}
+            <button type="submit" disabled={loading} className="btn-primary-glow w-full text-sm disabled:opacity-60">{loading ? 'Signing in…' : 'Sign in'}</button>
+          </form>}
+          <button type="button" onClick={() => { setStaff(!staff); setError(null); }} className="block mx-auto mt-6 text-xs text-slate-600 underline">
+            {staff ? 'Back to client login' : 'Staff or admin? Sign in with password'}
+          </button>
         </div>
-
-        <div className="text-center mt-6">
-          <Link href="/" className="text-xs text-ink-500 hover:text-navy-800">
-            ← Back to InkMonk Research Home
-          </Link>
-        </div>
-
+        <div className="text-center mt-6"><Link href="/" className="text-sm text-slate-600 hover:text-[#0A1128]">← Back to home</Link></div>
       </div>
     </div>
   );

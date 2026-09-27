@@ -30,6 +30,14 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 });
     }
 
+    // The repository previously shipped with a populated demo database. Those public
+    // passwords must never authenticate against a production deployment.
+    if (process.env.NODE_ENV === 'production' &&
+        ((email === 'admin@inkmonk.com' && password === 'admin123') ||
+         (email === 'client@inkmonk.com' && password === 'client123'))) {
+      return NextResponse.json({ error: 'Demo credentials are disabled. Contact the site owner.' }, { status: 403 });
+    }
+
     if (user.status === 'SUSPENDED') {
       return NextResponse.json({ error: 'Account suspended. Please contact us.' }, { status: 403 });
     }

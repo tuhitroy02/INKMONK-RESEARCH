@@ -51,7 +51,7 @@ export default function RootLayout({
         style={{ fontFamily: '"Comic Sans MS", "Comic Sans", "Comic Neue", cursive, sans-serif', fontWeight: 700 }}
       >
         <Navbar />
-        <main className="min-h-screen">
+        <main className="min-h-screen pt-20">
           {children}
         </main>
         <Footer />

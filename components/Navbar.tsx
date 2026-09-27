@@ -6,12 +6,12 @@ import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 
 const NAV_LINKS = [
-  { href: '/services',     label: 'Services' },
+  { href: '/services',     label: 'SERVICES' },
   { href: '/samples',      label: 'Samples' },
   { href: '/how-it-works', label: 'How It Works' },
-  { href: '/about',        label: 'About' },
+  { href: '/about',        label: 'ABOUT' },
   { href: '/faq',          label: 'FAQ' },
-  { href: '/contact',      label: 'Contact' },
+  { href: '/contact',      label: 'CONTACT' },
 ];
 
 export default function Navbar() {
@@ -43,13 +43,13 @@ export default function Navbar() {
 
           {/* Logo & Brand Name */}
           <Link href="/" className="flex items-center gap-3.5 group">
-            <div className="relative w-12 h-12 rounded-2xl overflow-hidden bg-white shadow-md p-1 border-2 border-orange-500/20 group-hover:border-orange-500 transition-colors">
+            <div className="relative w-12 h-12 shrink-0 rounded-2xl overflow-hidden bg-white shadow-md border-2 border-orange-500/20 group-hover:border-orange-500 transition-colors">
               <Image
                 src="/logo.png"
                 alt="InkMonk Research Logo"
                 fill
                 sizes="48px"
-                className="object-contain p-0.5"
+                className="object-contain !p-1.5"
                 priority
               />
             </div>

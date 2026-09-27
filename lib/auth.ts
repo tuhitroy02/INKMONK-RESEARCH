@@ -7,9 +7,14 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || 'inkmonk-research-secret-change-in-production-2026'
-);
+function sessionKey() {
+  const secret = process.env.JWT_SECRET;
+  if (!secret || (process.env.NODE_ENV === 'production' &&
+      (secret.length < 32 || secret.startsWith('replace-with-') || secret.startsWith('local-build-')))) {
+    throw new Error('Set a unique JWT_SECRET (at least 32 characters in production).');
+  }
+  return new TextEncoder().encode(secret);
+}
 
 export interface JWTPayload {
   userId: string;
@@ -23,12 +28,12 @@ export async function signToken(payload: JWTPayload): Promise<string> {
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(JWT_SECRET);
+    .sign(sessionKey());
 }
 
 export async function verifyToken(token: string): Promise<JWTPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, JWT_SECRET);
+    const { payload } = await jwtVerify(token, sessionKey());
     return payload as unknown as JWTPayload;
   } catch {
     return null;
