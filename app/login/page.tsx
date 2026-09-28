@@ -1,11 +1,11 @@
 'use client';
 
-import { Suspense, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 
 export default function LoginPage() {
-  return <Suspense fallback={<div className="min-h-screen" />}><LoginContent /></Suspense>;
+  return <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading sign-in…</div>}><LoginContent /></Suspense>;
 }
 
 function LoginContent() {
@@ -18,7 +18,19 @@ function LoginContent() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [providers, setProviders] = useState<{ google: boolean; email: boolean; phone: boolean } | null>(null);
   const [error, setError] = useState<string | null>(params.has('error') ? 'Google sign-in could not be completed. Please try again.' : null);
+
+  useEffect(() => {
+    let active = true;
+    fetch('/api/auth/providers', { cache: 'no-store' })
+      .then((response) => response.ok ? response.json() : Promise.reject())
+      .then((data) => { if (active) setProviders(data); })
+      .catch(() => { if (active) setProviders({ google: false, email: false, phone: false }); });
+    return () => { active = false; };
+  }, []);
+
+  const codeAvailable = identifier.includes('@') ? providers?.email : providers?.phone;
 
   async function post(url: string, body: object) {
     setLoading(true);
@@ -63,9 +75,9 @@ function LoginContent() {
         </div>
         <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200 shadow-lg">
           {!staff ? <>
-            <a href="/api/auth/google" className="w-full min-h-12 flex items-center justify-center gap-3 rounded-xl border border-slate-300 text-[#0A1128] hover:bg-slate-50 text-sm font-bold">
+            {!providers ? <p className="text-sm text-slate-500 text-center">Checking sign-in options…</p> : providers.google ? <a href="/api/auth/google" className="w-full min-h-12 flex items-center justify-center gap-3 rounded-xl border border-slate-300 text-[#0A1128] hover:bg-slate-50 text-sm font-bold">
               <span aria-hidden="true" className="text-xl font-bold text-blue-600">G</span> Continue with Google
-            </a>
+            </a> : <p className="text-sm text-slate-500 text-center">Google sign-in is being set up.</p>}
             <div className="flex items-center gap-3 my-6 text-xs text-slate-500"><span className="h-px bg-slate-200 flex-1" />OR USE A ONE-TIME CODE<span className="h-px bg-slate-200 flex-1" /></div>
             <form onSubmit={sent ? verifyCode : sendCode} className="space-y-4">
               <div>
@@ -82,7 +94,8 @@ function LoginContent() {
                   className="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm text-[#0A1128] bg-white" />
               </div>}
               {error && <p role="alert" className="text-sm text-red-700 bg-red-50 rounded-xl p-3">{error}</p>}
-              <button type="submit" disabled={loading} className="btn-primary-glow w-full text-sm disabled:opacity-60">
+              {!sent && providers && !codeAvailable && <p className="text-sm text-amber-800 bg-amber-50 rounded-xl p-3">{identifier.includes('@') ? 'Email' : 'SMS'} codes are not available yet.</p>}
+              <button type="submit" disabled={loading || !providers || (!sent && !codeAvailable)} className="btn-primary-glow w-full text-sm disabled:opacity-60">
                 {loading ? 'Please wait…' : sent ? 'Verify and sign in' : 'Send me a code'}
               </button>
               {sent && <button type="button" disabled={loading} onClick={() => { setSent(false); setCode(''); }} className="block mx-auto text-sm text-orange-700 underline">Request another code</button>}
